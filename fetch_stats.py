@@ -16,6 +16,7 @@ import streamlit as st
 # ---------------- 基础设置 ----------------
 # 本地开发加载 .env
 def run():
+    print('fetcjh_stats.py: 开始抓取数据...')
     load_dotenv()
     
     API_KEY = (
@@ -187,10 +188,16 @@ def run():
                 all_rows.append(row)
     
         new_df = pd.DataFrame(all_rows)
+        valid_ids = set(video_ids)
+        print(f"✅ 有效视频 ID : {valid_ids}")
     
         if os.path.exists(DATA_CSV) and os.path.getsize(DATA_CSV) > 0:
             old_df = pd.read_csv(DATA_CSV)
+
+   
             merged = pd.concat([old_df, new_df], ignore_index=True)
+            merged = merged[merged["video_id"].isin(valid_ids)]
+         
             merged = (
                 merged.sort_values(["video_id", "date"])
                       .drop_duplicates(subset=["video_id", "date"], keep="last")
@@ -202,6 +209,10 @@ def run():
         print(f"✅ Saved {len(new_df)} rows. History size: {len(merged)}")
         print("最后三行数据：")
         print(merged.tail(3))
-    
+    try:
+        main()
+    except Exception as e:
+        print(f"❌ 抓取失败：{e}")
+        sys.exit(1)
 
      
