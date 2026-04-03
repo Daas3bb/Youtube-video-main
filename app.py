@@ -87,6 +87,33 @@ latest = latest.sort_values("published_at", ascending=False, na_position="last")
 
 # -------- 侧边筛选 --------
 with st.sidebar:
+    st.write("---")
+    st.subheader("➕ 添加监控视频")
+
+    new_url = st.text_input("输入 YouTube 视频 URL")
+
+    if st.button("添加到监控列表"):
+        if not new_url:
+            st.warning("请输入视频链接")
+        else:
+            # 读取现有 CSV
+            csv_path = "inputs/videos.csv"
+
+            if os.path.exists(csv_path):
+                df_v = pd.read_csv(csv_path)
+            else:
+                df_v = pd.DataFrame(columns=["video"])
+
+            # 去重（避免重复添加）
+            if new_url in df_v["video"].astype(str).values:
+                st.warning("该视频已存在")
+            else:
+                df_v.loc[len(df_v)] = [new_url]
+                df_v.to_csv(csv_path, index=False)
+
+                st.success("✅ 添加成功！")
+                st.rerun()
+
     st.header("筛选 & 工具")
 
     # 频道筛选（含 All）
