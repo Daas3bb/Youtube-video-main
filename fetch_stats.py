@@ -186,6 +186,8 @@ def main():
 
     merged.to_csv(DATA_CSV, index=False)
     print(f"✅ Saved {len(new_df)} rows. History size: {len(merged)}")
+    print("最后三行数据：")
+    print(merged.tail(3))
 
 if __name__ == "__main__":
     try:
