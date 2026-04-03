@@ -99,7 +99,8 @@ def run():
 
 
     df = load_data()
-  
+    df = df.dropna(subset=["day"])
+    
     # ✅ 新增一列，取纯日期（方便和 date_input 的值对齐）
     df["day"] = df["date"].dt.date
 
