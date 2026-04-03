@@ -11,12 +11,25 @@ import requests
 from dotenv import load_dotenv
 from pytz import timezone
 
+import streamlit as st
+
 # ---------------- 基础设置 ----------------
+# 本地开发加载 .env
 load_dotenv()
-API_KEY = os.getenv("YOUTUBE_API_KEY")
+
+API_KEY = (
+    st.secrets.get("YOUTUBE_API_KEY")  # 云端优先
+    if hasattr(st, "secrets")
+    else None
+)
+
+# fallback 到本地 .env
 if not API_KEY:
-    print("❌ 缺少环境变量 YOUTUBE_API_KEY（请在 .env 中配置）")
-    sys.exit(1)
+    API_KEY = os.getenv("YOUTUBE_API_KEY")
+
+if not API_KEY:
+    raise RuntimeError("❌ 缺少 YOUTUBE_API_KEY（请配置 secrets 或 .env）")
+    st.stop()
 
 # 可选代理（如需走代理，.env 里设置 HTTP_PROXY / HTTPS_PROXY）
 PROXIES = {
