@@ -130,27 +130,30 @@ def run():
     msg_right = f"｜ 文件更新时间（LA）：**{last_file_time_la}**" if last_file_time_la else ""
     st.info(f"🕒 {msg_left} {msg_right}")
 
+
     # 每个视频最新一行（总计信息）
     latest = df.sort_values("date").groupby("video_id").tail(1).copy()
-    # ====== 新增：读取 videos.csv 顺序 ======
-    videos_df = pd.read_csv("inputs/videos.csv")
+    # ====== 按文件顺序===---------------------------------------==
+    # videos_df = pd.read_csv("inputs/videos.csv")
 
-    def extract_id(x):
-        import re
-        m = re.search(r"([A-Za-z0-9_-]{11})", str(x))
-        return m.group(1) if m else None
+    # def extract_id(x):
+    #     import re
+    #     m = re.search(r"([A-Za-z0-9_-]{11})", str(x))
+    #     return m.group(1) if m else None
 
-    videos_df["video_id"] = videos_df["video"].apply(extract_id)
+    # videos_df["video_id"] = videos_df["video"].apply(extract_id)
 
-    # 关键：顺序编号
-    videos_df["order"] = range(len(videos_df))
+    # # 关键：顺序编号
+    # videos_df["order"] = range(len(videos_df))
 
-    # 合并顺序到 latest
-    latest = latest.merge(
-        videos_df[["video_id", "order"]],
-        on="video_id",
-        how="left"
-    )
+    # # 合并顺序到 latest
+    # latest = latest.merge(
+    #     videos_df[["video_id", "order"]],
+    #     on="video_id",
+    #     how="left"
+    # )
+# ====== 按文件顺序===---------------------------------------==
+
     # 默认按发布日期倒序（新→旧）
     latest = latest.sort_values("published_at", ascending=False, na_position="last")
 
@@ -208,7 +211,7 @@ def run():
 
         # 排序依据（含“按发布日期（新→旧）”）
         sort_label = st.selectbox(
-            "排序依据", ["按文件顺序","按播放量", "按点赞数", "按评论数", "按发布日期（新→旧）"], index=3
+            "排序依据", ["按播放量", "按点赞数", "按评论数", "按发布日期（新→旧）"], index=3
         )
         sort_map = {"按播放量": "views", "按点赞数": "likes", "按评论数": "comments"}
 
@@ -223,15 +226,11 @@ def run():
         latest if sel_channel == "All" else latest[latest["channel_title"] == sel_channel]
     )
 
-    # 应用排序
-    if sort_label == "按文件顺序":
-        filtered_latest = filtered_latest.sort_values("order",ascending=False, na_position="last")
-
-    elif sort_label == "按发布日期（新→旧）":
+ # 应用排序
+    if sort_label == "按发布日期（新→旧）":
         filtered_latest = filtered_latest.sort_values(
             "published_at", ascending=False, na_position="last"
         )
-
     else:
         sort_col = sort_map[sort_label]
         filtered_latest = filtered_latest.sort_values(sort_col, ascending=False)
